@@ -1,74 +1,90 @@
-# 🔮 GitPulse
+# GitPulse
 
-> GitHub PR Review Assistant — track all your open pull requests across repos in one dashboard.
+A dashboard for tracking pull requests across multiple GitHub repositories.
 
-![Next.js](https://img.shields.io/badge/Next.js-14-black?logo=next.js)
-![TypeScript](https://img.shields.io/badge/TypeScript-strict-blue?logo=typescript)
-![HeroUI](https://img.shields.io/badge/HeroUI-v2-purple)
-![SQLite](https://img.shields.io/badge/Cache-SQLite-green)
+GitPulse shows open PRs, review status, CI state, comments, commits, and changed files in one place so you do not have to keep jumping between repo tabs.
 
-## Features
+## Why I built it
 
-- 📊 **Unified Dashboard** — all open PRs across tracked repositories in one view
-- 🔍 **PR Detail View** — inline diff viewer with syntax highlighting, review history, commits
-- ✅ **CI Status Indicators** — real-time CI pass/fail per PR
-- 🏷️ **Review Status Chips** — Approved / Changes Requested / Pending at a glance
-- 💬 **Notification Counts** — comment counts, review counts per PR
-- 🗄️ **SQLite Caching** — 5-minute cache to avoid GitHub rate limits
-- ➕ **Repo Manager** — add/remove repos to track; auto-discovers your GitHub repos
+Following PRs across multiple repos gets annoying quickly. You open one repo for CI, another for review comments, another for commits, then repeat the same thing again later.
 
-## Stack
+I built GitPulse to make that workflow simpler: one dashboard, all the PRs I care about, and enough detail to know what needs attention.
 
-- **Next.js 14** App Router + TypeScript strict
-- **Octokit REST** for GitHub API
-- **HeroUI v2** + Tailwind for UI
-- **better-sqlite3** for caching
-- **Vitest** for tests
+## What it does
 
-## Setup
+- Tracks open PRs across selected repositories
+- Shows CI status at a glance
+- Shows review state: approved, changes requested, or pending
+- Opens PR details with files, commits, reviews, and comments
+- Caches GitHub API responses locally to reduce rate-limit pressure
+- Lets you add or remove repos from the dashboard
+
+## Tech stack
+
+- Next.js 14
+- TypeScript
+- Tailwind CSS + HeroUI
+- Octokit REST API
+- SQLite via `better-sqlite3`
+- Vitest
+
+## Run locally
 
 ```bash
+git clone https://github.com/IsaacOdeimor/gitpulse.git
+cd gitpulse
 npm install
+```
 
-# Set your GitHub token (needs repo + read:org scopes)
+Set a GitHub token:
+
+```bash
 export GITHUB_TOKEN=ghp_your_token_here
+```
 
+Then run:
+
+```bash
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000), click **Manage Repos**, add your repositories.
+Open `http://localhost:3000`, then add repos from the repo manager.
 
-## Environment Variables
+## Environment variables
 
-| Variable | Required | Description |
-|----------|----------|-------------|
-| `GITHUB_TOKEN` | Yes | GitHub personal access token (repo scope) |
-| `DB_PATH` | No | SQLite database path (default: `./gitpulse.db`) |
+| Variable | Required | Purpose |
+| --- | --- | --- |
+| `GITHUB_TOKEN` | yes | GitHub personal access token |
+| `DB_PATH` | no | SQLite database path |
+
+## Project structure
+
+```txt
+src/
+├── app/
+│   ├── api/
+│   │   ├── prs/          # list PRs
+│   │   ├── pr/detail/    # PR details
+│   │   └── repos/        # repo management
+│   └── page.tsx          # dashboard UI
+├── components/
+│   ├── PRTable.tsx       # PR list
+│   ├── PRDetailModal.tsx # PR details
+│   └── RepoManager.tsx   # tracked repos
+├── lib/
+│   ├── github.ts         # GitHub API wrapper
+│   └── db.ts             # SQLite cache
+└── types/                # shared types
+```
 
 ## Development
 
 ```bash
-npm run dev      # Development server
-npm run build    # Production build
-npm run test     # Run tests
+npm run dev
+npm run build
+npm run test
 ```
 
-## Architecture
+## Notes
 
-```
-src/
-├── app/
-│   ├── api/
-│   │   ├── prs/route.ts        # List PRs for a repo
-│   │   ├── pr/detail/route.ts  # PR detail with files/reviews/commits
-│   │   └── repos/              # Tracked repo management + GitHub search
-│   └── page.tsx                # Main dashboard
-├── components/
-│   ├── PRTable.tsx             # Sortable PR list with status chips
-│   ├── PRDetailModal.tsx       # Full PR detail with diff tabs
-│   └── RepoManager.tsx         # Add/remove tracked repos
-├── lib/
-│   ├── github.ts               # Octokit wrapper
-│   └── db.ts                   # SQLite cache layer
-└── types/index.ts              # Shared TypeScript types
-```
+The main things worth reviewing are the GitHub API wrapper, caching layer, PR status normalization, and the way the frontend turns GitHub data into a quick review workflow.
